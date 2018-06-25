@@ -31,28 +31,14 @@ class DecoderRNN(nn.Module):
         self.lstm = nn.LSTM(embed_size, hidden_size, num_layers, 
                             dropout=0.4 if num_layers > 1 else 0,
                             batch_first=True)
-        #self.lstm = nn.LSTM(embed_size, hidden_size)
         # Add a linear layer that maps from hidden state space to vocab space
-        #self.dropout = nn.Dropout(0.2)
         self.linear = nn.Linear(hidden_size, vocab_size)
-        #self.softmax = nn.LogSoftmax(dim=1)
-        #self.hidden = self.init_hidden()
-
-    #def init_hidden(self):
-        # Initialize the hidden states
-        #return (torch.zeros(1, 1, self.hidden_size))
-        #        torch.zeros(1, 1, self.hidden_size))
-
     
     def forward(self, features, captions):
-        #print('type(captions):', type(captions))
-        captions = captions[:,:-1]
-        #print('type(captions):', type(captions))        
+        captions = captions[:,:-1]       
         embeds = self.embedding(captions)
-        #embeds = F.relu(embed)
         embeds = torch.cat((features.unsqueeze(1), embeds), 1)
         outputs, hiddens = self.lstm(embeds)
-        #outputs = self.dropout(outputs)   
         outputs = self.linear(outputs) 
         return outputs      
 
@@ -60,7 +46,6 @@ class DecoderRNN(nn.Module):
     def sample(self, inputs, states=None, max_len=20):
             #" accepts pre-processed image tensor (inputs) and returns predicted sentence (list of tensor ids of length max_len) "
         res = []
-        #prev_state = None
 
         for i in range(max_len):
             hiddens, states = self.lstm(inputs, states)
@@ -72,7 +57,4 @@ class DecoderRNN(nn.Module):
             # if the predicted idx is the stop index, the loop stops
             if predicted_idx == 1:
                 break
-        #res = torch.cat(res, 1)
-        #res = res.cpu().data.numpy()
-        #return res.tolist()[0]
         return res
